@@ -1,0 +1,5 @@
+{
+  "name": "snow-miku",
+  "owner": { "name": "conlabx1" },
+  "plugins": [{ "name": "snow-miku", "source": "./" }]
+}
