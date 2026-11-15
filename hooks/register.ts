@@ -149,8 +149,8 @@ export const register: Register = (on) => {
   on('session.start', async ($, e, next) => {
     const unpainted = problems.find((line) => line.startsWith("Desktop won't paint"))
     if (unpainted !== undefined) $.ui.toast(unpainted)
-    const set = await $.theme.set(LOOK)
-    if (!set.isDrawn) $.ui.status(set.reason)
+    // 화면이 붙기 전이면 isDrawn 이 false 지만, 설정은 남아 붙는 화면이 그린다
+    await $.theme.set(LOOK)
     await $.command.register({ name: 'snow-off', description: '눈 테마 끄기' })
     await $.command.register({ name: 'snow-on', description: '눈 테마 다시 켜기' })
     return next(e)
