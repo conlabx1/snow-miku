@@ -141,7 +141,8 @@ export const CLAWD_LAYER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
 
 const LOOK: ThemeSetArgs = {
   colors: theme,
-  backdrop: { scene: SCENE, glass: { blur: 14, opacity: 0.55 } },
+  // 배경이 또렷이 비치게 거의 투명하게: 색조가 어두운 모드에 안 맞으면 앱이 버리므로 surface-0 색을 쓴다
+  backdrop: { scene: SCENE, glass: { blur: 2, tint: '#0e1b24', opacity: 0.15 } },
 }
 
 export const register: Register = (on) => {
