@@ -148,6 +148,7 @@ const LOOK: ThemeSetArgs = {
 // 설치본은 배경을 건 이름이 '이름@마켓' 으로 올 수 있어 앞부분만 맞춰 본다
 export const isMine = (setter: string, own: string) => setter.split('@')[0] === own.split('@')[0]
 let lastAsked = '(아직 없음)'
+let isOn = true
 
 export const register: Register = (on) => {
   // 배경은 reload·--resume 에서 유지되지 않아 세션 시작마다 다시 건다
@@ -159,6 +160,16 @@ export const register: Register = (on) => {
     await $.command.register({ name: 'snow-off', description: '눈 테마 끄기' })
     await $.command.register({ name: 'snow-on', description: '눈 테마 다시 켜기' })
     return next(e)
+  })
+
+  // 세션 시작 때 건 배경을 새 화면 코드가 첫 그리기에서 놓친다: 같은 설정을 다시 걸면 무시되므로 껐다 켠다
+  on('session.attach', async ($, e, next) => {
+    const done = await next(e)
+    if (isOn && (e.surface === 'desktop' || e.surface === 'mobile')) {
+      await $.theme.clear()
+      await $.theme.set(LOOK)
+    }
+    return done
   })
 
   on('ui.render', { component: 'Backdrop' }, async ($, e, next) => {
@@ -176,11 +187,14 @@ export const register: Register = (on) => {
   })
 
   on('command.run', { command: 'snow-off' }, async ($) => {
+    isOn = false
     await $.theme.clear()
     return { text: '눈 테마를 껐어요' }
   })
 
   on('command.run', { command: 'snow-on' }, async ($) => {
+    isOn = true
+    await $.theme.clear()
     const set = await $.theme.set(LOOK)
     const names = `(모드 이름 ${$.plugin.name}, 마지막 배경 요청 ${lastAsked})`
     return { text: set.isDrawn ? `눈 테마를 켰어요 ${names}` : `켜지 못했어요: ${set.reason} ${names}` }
