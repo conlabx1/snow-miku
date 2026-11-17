@@ -145,6 +145,10 @@ const LOOK: ThemeSetArgs = {
   backdrop: { scene: SCENE, glass: { blur: 2, tint: '#0e1b24', opacity: 0.15 } },
 }
 
+// 설치본은 배경을 건 이름이 '이름@마켓' 으로 올 수 있어 앞부분만 맞춰 본다
+export const isMine = (setter: string, own: string) => setter.split('@')[0] === own.split('@')[0]
+let lastAsked = '(아직 없음)'
+
 export const register: Register = (on) => {
   // 배경은 reload·--resume 에서 유지되지 않아 세션 시작마다 다시 건다
   on('session.start', async ($, e, next) => {
@@ -158,7 +162,8 @@ export const register: Register = (on) => {
   })
 
   on('ui.render', { component: 'Backdrop' }, async ($, e, next) => {
-    if (e.props.plugin !== $.plugin.name || e.props.scene !== SCENE) return next(e)
+    lastAsked = e.props.plugin
+    if (!isMine(e.props.plugin, $.plugin.name) || e.props.scene !== SCENE) return next(e)
     if (e.surface !== 'desktop' && e.surface !== 'mobile') return next(e)
     const { Box, Svg } = $.ui.resolve(e)
     return Box({
@@ -177,6 +182,7 @@ export const register: Register = (on) => {
 
   on('command.run', { command: 'snow-on' }, async ($) => {
     const set = await $.theme.set(LOOK)
-    return { text: set.isDrawn ? '눈 테마를 켰어요' : `켜지 못했어요: ${set.reason}` }
+    const names = `(모드 이름 ${$.plugin.name}, 마지막 배경 요청 ${lastAsked})`
+    return { text: set.isDrawn ? `눈 테마를 켰어요 ${names}` : `켜지 못했어요: ${set.reason} ${names}` }
   })
 }
